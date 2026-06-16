@@ -6,7 +6,7 @@ sezonów 1993-2025 i zapisuje je prosto do Unity Catalog Volume.
 """
 
 from __future__ import annotations
-
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -14,6 +14,8 @@ from pathlib import Path
 import requests
 
 TIMESTAMP = datetime.now().strftime("%Y-%m-%d_%H-%M")
+
+subprocess.check_call([sys.executable, "-m", "pip", "install", "kaggle"])
 
 
 def log_event(log_lines: list[str], src: str, size: int, status: str, msg: str) -> None:
