@@ -58,9 +58,20 @@ def _get_kaggle_credentials() -> tuple[str, str]:
     return username, key
 
 
+def _validate_path(path: str, label: str) -> None:
+    if not path.startswith("/"):
+        raise ValueError(
+            f"{label}='{path}' nie jest ścieżką absolutną — sprawdź pole Parameters "
+            "tego taska (prawdopodobnie literówka albo przypadkowo dopisana flaga, np. '-f')."
+        )
+
+
 def main(volume_dest: str, volume_logs: str) -> None:
     """volume_dest np. /Volumes/workspace/default/pdzd/input/transfermarkt_raw
     — tu wylądują wszystkie pliki z bundla (players.csv, player_valuations.csv, ...)."""
+    _validate_path(volume_dest, "volume_dest")
+    _validate_path(volume_logs, "volume_logs")
+
     log_lines: list[str] = []
     log_event(log_lines, "SYSTEM", 0, "INFO", "Starting Transfermarkt acquisition process")
 

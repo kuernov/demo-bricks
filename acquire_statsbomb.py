@@ -38,9 +38,20 @@ def _flush_log(log_lines: list[str], volume_logs: str) -> None:
     )
 
 
+def _validate_path(path: str, label: str) -> None:
+    if not path.startswith("/"):
+        raise ValueError(
+            f"{label}='{path}' nie jest ścieżką absolutną — sprawdź pole Parameters "
+            "tego taska (prawdopodobnie literówka albo przypadkowo dopisana flaga, np. '-f')."
+        )
+
+
 def main(volume_dest: str, volume_logs: str) -> None:
     """volume_dest np. /Volumes/workspace/default/pdzd/input
     — utworzy w nim podfoldery events/, lineups/, matches/."""
+    _validate_path(volume_dest, "volume_dest")
+    _validate_path(volume_logs, "volume_logs")
+
     log_lines: list[str] = []
     log_event(log_lines, "SYSTEM", 0, "INFO", "Starting selective extraction")
 

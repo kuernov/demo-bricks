@@ -46,8 +46,19 @@ def try_download(url: str, dest_dir: Path, filename: str, log_lines: list[str]) 
         return False
 
 
+def _validate_path(path: str, label: str) -> None:
+    if not path.startswith("/"):
+        raise ValueError(
+            f"{label}='{path}' nie jest ścieżką absolutną — sprawdź pole Parameters "
+            "tego taska (prawdopodobnie literówka albo przypadkowo dopisana flaga, np. '-f')."
+        )
+
+
 def main(volume_dest: str, volume_logs: str) -> None:
     """volume_dest np. /Volumes/workspace/default/pdzd/input/odds_excel"""
+    _validate_path(volume_dest, "volume_dest")
+    _validate_path(volume_logs, "volume_logs")
+
     log_lines: list[str] = []
     dest_dir = Path(volume_dest)
     log_event(
