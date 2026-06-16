@@ -35,7 +35,15 @@ def try_download(url: str, dest_dir: Path, filename: str, log_lines: list[str]) 
         resp = requests.get(url, timeout=30)
         if resp.status_code != 200 or not resp.content:
             return False
-        dest_dir.mkdir(parents=True, exist_ok=True)
+            
+        # Zastąpienie pathlib.mkdir natywnym dbutils dla Databricks
+        try:
+            from databricks.sdk.runtime import dbutils
+            dbutils.fs.mkdirs(str(dest_dir))
+        except ImportError:
+            # Fallback, jeśli uruchamiasz skrypt lokalnie (poza Databricks)
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            
         (dest_dir / filename).write_bytes(resp.content)
         size = len(resp.content)
         print(f"Found {filename} ({size} bytes). Zapisano do Volume.")
