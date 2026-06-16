@@ -32,7 +32,12 @@ def log_event(log_lines: list[str], src: str, size: int, status: str, msg: str) 
 
 def _flush_log(log_lines: list[str], volume_logs: str) -> None:
     log_dir = Path(volume_logs)
-    log_dir.mkdir(parents=True, exist_ok=True)
+    
+    try:
+        from databricks.sdk.runtime import dbutils
+        dbutils.fs.mkdirs(str(log_dir))
+    except ImportError:
+        log_dir.mkdir(parents=True, exist_ok=True)
     (log_dir / f"acq_statsbomb_{TIMESTAMP}.log").write_text(
         "\n".join(log_lines) + "\n", encoding="utf-8"
     )

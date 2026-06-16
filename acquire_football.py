@@ -102,8 +102,16 @@ def main(volume_dest: str, volume_logs: str) -> None:
 
 
 if __name__ == "__main__":
-    # Ustaw na sztywno ścieżki do Unity Catalog
-    DEST =   "/Volumes/workspace/default/pdzd/input/odds_excel"
-    LOGS = "/Volumes/workspace/default/pdzd/logs/acquisition"
-    
-    main(DEST, LOGS)
+    # 1. Definiujemy domyślne ścieżki (zadziałają przy kliknięciu "Run file")
+    DEFAULT_DEST = "/Volumes/workspace/default/pdzd/input/odds_excel"
+    DEFAULT_LOGS = "/Volumes/workspace/default/pdzd/logs/football_acquisition"
+
+    # 2. Sprawdzamy, czy podano dokładnie 3 argumenty (czyli np. w Databricks Job)
+    # sys.argv[0] to zawsze nazwa skryptu, więc szukamy sys.argv[1] i sys.argv[2]
+    if len(sys.argv) == 3 and not sys.argv[1].startswith("-f"):
+        # Uruchomienie z podanymi parametrami
+        main(sys.argv[1], sys.argv[2])
+    else:
+        # Uruchomienie z przycisku "Run file" lub błędnymi flagami
+        print(f"Brak (lub błędne) argumenty sys.argv. Używam domyślnych ścieżek.")
+        main(DEFAULT_DEST, DEFAULT_LOGS)
