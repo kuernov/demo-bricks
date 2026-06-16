@@ -94,7 +94,8 @@ def main(volume_dest: str, volume_logs: str) -> None:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Użycie: python acquire_football.py <volume_input_dest> <volume_logs>")
-        sys.exit(-1)
-    main(sys.argv[1], sys.argv[2])
+    # Ustaw na sztywno ścieżki do Unity Catalog
+    DEST =   "/Volumes/workspace/default/pdzd/input/odds_excel"
+    LOGS = "/Volumes/workspace/default/pdzd/logs/acquisition"
+    
+    main(DEST, LOGS)
