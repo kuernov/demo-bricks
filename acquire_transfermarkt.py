@@ -36,24 +36,50 @@ def _flush_log(log_lines: list[str], volume_logs: str) -> None:
     )
 
 
+def _get_kaggle_credentials() -> tuple[str, str]:
+    """Najpierw zmienne środowiskowe (gdyby ktoś wolał je ustawić ręcznie),
+    a w razie ich braku — Databricks Secrets przez databricks-sdk. SDK
+    autoryzuje się sam w oparciu o kontekst uruchomienia (notebook, Python
+    script task — wszędzie tak samo), więc nie potrzeba `dbutils`."""
+    if "KAGGLE_USERNAME" in os.environ and "KAGGLE_KEY" in os.environ:
+        return os.environ["KAGGLE_USERNAME"], os.environ["KAGGLE_KEY"]
+
+    import base64
+
+    from databricks.sdk import WorkspaceClient
+
+    w = WorkspaceClient()
+    username = base64.b64decode(
+        w.secrets.get_secret(scope="pdzd", key="kaggle_username").value
+    ).decode("utf-8")
+    key = base64.b64decode(
+        w.secrets.get_secret(scope="pdzd", key="kaggle_key").value
+    ).decode("utf-8")
+    return username, key
+
+
 def main(volume_dest: str, volume_logs: str) -> None:
     """volume_dest np. /Volumes/workspace/default/pdzd/input/transfermarkt_raw
     — tu wylądują wszystkie pliki z bundla (players.csv, player_valuations.csv, ...)."""
     log_lines: list[str] = []
     log_event(log_lines, "SYSTEM", 0, "INFO", "Starting Transfermarkt acquisition process")
 
-    if "KAGGLE_USERNAME" not in os.environ or "KAGGLE_KEY" not in os.environ:
+    try:
+        username, key = _get_kaggle_credentials()
+        os.environ["KAGGLE_USERNAME"] = username
+        os.environ["KAGGLE_KEY"] = key
+    except Exception as e:  # noqa: BLE001
         log_event(
             log_lines,
             "TRANSFERMARKT",
             0,
             "ERROR",
-            "Brak KAGGLE_USERNAME / KAGGLE_KEY w środowisku — ustaw je przed odpaleniem",
+            f"Brak danych logowania Kaggle (env vars i Databricks Secrets 'pdzd'): {e}",
         )
         _flush_log(log_lines, volume_logs)
         sys.exit(-1)
 
-    from kaggle.api.kaggle_api_extended import KaggleApi  # import po sprawdzeniu env vars
+    from kaggle.api.kaggle_api_extended import KaggleApi  # import po ustawieniu env vars
 
     dest_dir = Path(volume_dest)
 
