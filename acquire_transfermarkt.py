@@ -10,7 +10,7 @@ na twardo w kodzie / repo. Wymaga też `%pip install kaggle` w notatniku.
 """
 
 from __future__ import annotations
-
+import subprocess
 import os
 import shutil
 import sys
@@ -20,6 +20,7 @@ from pathlib import Path
 
 TIMESTAMP = datetime.now().strftime("%Y-%m-%d_%H-%M")
 DATASET = "davidcariboo/player-scores"
+subprocess.check_call([sys.executable, "-m", "pip", "install", "kaggle"])
 
 
 def log_event(log_lines: list[str], src: str, size: int, status: str, msg: str) -> None:
